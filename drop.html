@@ -986,6 +986,11 @@ $('fsAuto').checked=store.get('tg2_fs',true);$('fsAuto').onchange=e=>store.set('
 ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{$('fsBtn').textContent=fsEl()?'🗗':'⛶';setTimeout(detectDevice,150)}));
 
 
+/* ===== 開始畫面：點外面空白處回首頁 ===== */
+$('startOv').style.cursor='pointer';
+$('startOv').addEventListener('click',e=>{if(e.target===$('startOv'))location.href='/'});
+$('startOv').querySelector('.panel').style.cursor='auto';
+$('startOv').querySelector('.panel').insertAdjacentHTML('beforeend','<p class="muted" style="text-align:center;margin:8px 0 0">點視窗外面可以回遊戲選單</p>');
 /* ===== 過關畫面（給關主看） ===== */
 function showPass(win){$('passBox').innerHTML=win
   ?'<div class="pass"><div class="ok-big">🎉 過關！</div><b>請把畫面給關主看</b></div>'

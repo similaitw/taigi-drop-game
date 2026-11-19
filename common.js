@@ -124,6 +124,12 @@ T.countdown = function(cb){
 T.fullscreen = function(){ const el=document.documentElement,req=el.requestFullscreen||el.webkitRequestFullscreen;
   if(!req||document.fullscreenElement||document.webkitFullscreenElement)return; try{const p=req.call(el);p&&p.catch&&p.catch(()=>{})}catch(e){} };
 
+/* ---------- 開始畫面：點外面空白處回首頁 ---------- */
+document.addEventListener('DOMContentLoaded',()=>{const ov=document.getElementById('startOv');if(!ov)return;
+  ov.style.cursor='pointer';ov.title='點外面回遊戲選單';
+  ov.addEventListener('click',e=>{if(e.target===ov)location.href='/'});
+  const p=ov.querySelector('.panel');if(p){p.style.cursor='auto';const h=document.createElement('p');h.className='muted';h.style.cssText='text-align:center;margin:8px 0 0';h.textContent='點視窗外面可以回遊戲選單';p.appendChild(h)}});
+
 /* ---------- 關卡與過關畫面 ---------- */
 T.STATIONS = [
   {id:'drop',   name:'台語接接樂', icon:'🏮', url:'/drop',    desc:'接住掉落的台語詞'},
