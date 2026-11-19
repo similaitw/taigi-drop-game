@@ -13,9 +13,9 @@
 <title>台語闖關大挑戰</title>
 <style>
 .hero{text-align:center;padding:0 0 2px}
-.hero .bird{font-size:clamp(44px,8vw,64px);line-height:1;animation:hop 2.4s ease-in-out infinite}
+.hero .bird{display:inline-block;font-size:.9em;margin-right:.15em;animation:hop 2.4s ease-in-out infinite;text-shadow:none}
 @keyframes hop{0%,70%,100%{transform:translateY(0)}80%{transform:translateY(-14px) rotate(-6deg)}90%{transform:translateY(0)}}
-.hero h1{font-family:"Noto Serif TC",serif;margin:4px 0 0;color:var(--red);font-size:clamp(34px,7vw,58px);text-shadow:3px 3px 0 #fff,6px 6px 0 rgba(158,42,25,.22)}
+.hero h1{font-family:"Noto Serif TC",serif;margin:2px 0 14px;color:var(--red);font-size:clamp(34px,7vw,58px);text-shadow:3px 3px 0 #fff,6px 6px 0 rgba(158,42,25,.22)}
 .hero p{margin:6px 0 0;color:#6b513d;font-weight:700}
 .bar{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:14px 0 16px}
 .stampbtn b{color:var(--gold);margin-left:4px}
@@ -39,18 +39,16 @@
 .guide{margin-top:16px}
 .guide ol{margin:6px 0 0;padding-left:22px;line-height:1.8;font-weight:700}
 @media (max-width:900px){.games{grid-template-columns:repeat(2,1fr)}}
-@media (max-width:560px){.games{grid-template-columns:1fr;gap:12px}.g .how{font-size:13.5px}}
+@media (max-width:560px){.hero h1{padding:0 38px;font-size:clamp(26px,7.5vw,40px)}.games{grid-template-columns:1fr;gap:12px}.g .how{font-size:13.5px}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <button class="iconbtn" id="musicBtn" style="position:absolute;top:8px;right:10px;z-index:5;min-width:34px;height:34px;font-size:15px;border-width:2px;border-radius:10px;box-shadow:0 2px 0 var(--line);padding:0 6px">🎵</button>
   <div class="hero">
-    <div class="bird">🐦</div>
-    <h1>台語闖關大挑戰</h1>
-    <p>揀一關來耍！找關主挑戰，過關畫面給關主看 🎉</p>
+    <h1><span class="bird">🐦</span>台語闖關大挑戰</h1>
   </div>
-<div style="height:14px"></div>
+
   <div class="games" id="games"></div>
   <div class="foot"><span class="muted" id="srcInfo"></span><a class="muted" href="/admin">題庫管理</a></div>
 </div>
