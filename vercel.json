@@ -1,10 +1,33 @@
 {
   "cleanUrls": true,
-  "regions": ["hnd1"],
+  "regions": [
+    "hnd1"
+  ],
   "headers": [
-    { "source": "/admin(.html)?", "headers": [
-      { "key": "X-Robots-Tag", "value": "noindex" },
-      { "key": "Cache-Control", "value": "no-store" }
-    ]}
+    {
+      "source": "/admin(.html)?",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/booth",
+      "destination": "/",
+      "permanent": false
+    },
+    {
+      "source": "/pass",
+      "destination": "/",
+      "permanent": false
+    }
   ]
 }

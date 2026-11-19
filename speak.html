@@ -9,7 +9,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@500;700&family=Noto+Sans+TC:wght@500;700;900&family=Noto+Serif+TC:wght@900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="common.css">
-<script src="lib/qrcode.js"></script>
 <script src="common.js"></script>
 <title>講台語挑戰・台語闖關</title>
 <style>
@@ -56,7 +55,7 @@
 <div class="overlay hide" id="endOv"><div class="panel" style="text-align:center">
   <h1 id="endTitle"></h1><div class="big-num" id="endScore">0</div><p class="sub" id="endInfo"></p>
   <div id="passBox"></div>
-  <div class="row" style="justify-content:center"><button class="btn red" id="againBtn">再玩一次</button><a class="btn" href="/booth">集章卡</a><a class="btn" href="/">遊戲選單</a></div>
+  <div class="row" style="justify-content:center"><button class="btn red" id="againBtn">再玩一次</button><a class="btn" href="/">遊戲選單</a></div>
 </div></div>
 <script>
 const {$,shuffle,esc}=T;
@@ -82,7 +81,7 @@ function start(){T.fullscreen();$('startOv').classList.add('hide');$('endOv').cl
   stopCd=T.countdown(()=>{stopCd=null;playing=true;next();t0=performance.now();raf=requestAnimationFrame(tick)})}
 function end(){playing=false;cancelAnimationFrame(raf);T.music.stop();const win=ok>=PASS;
   $('endTitle').textContent=win?'台語講真好！':'擱加油！';$('endScore').textContent=ok;$('endInfo').textContent=`講對 ${ok} 個（共 ${tried} 題）`;
-  if(win){T.sfx.win();T.confetti(innerWidth/2,innerHeight/3,40);T.showPass($('passBox'),'speak')}else{T.sfx.bad();$('passBox').innerHTML=`<div class="fail">講對 ${PASS} 個才過關，再試一次！</div>`}
+  if(win){T.sfx.win();T.confetti(innerWidth/2,innerHeight/3,40);T.showResult($('passBox'),true)}else{T.sfx.bad();$('passBox').innerHTML=`<div class="fail">講對 ${PASS} 個才過關，再試一次！</div>`}
   $('endOv').classList.remove('hide');setTimeout(()=>T.music.play('title'),1600)}
 $('startBtn').onclick=start;$('againBtn').onclick=start;
 $('stopBtn').onclick=()=>{if(stopCd){stopCd();stopCd=null;T.music.play('title');$('startOv').classList.remove('hide');return}if(playing)end()};

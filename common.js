@@ -1,4 +1,4 @@
-/* 台語闖關・共用程式：題庫、音效音樂、過關碼與集章 */
+/* 台語闖關・共用程式：題庫、音效音樂、過關畫面 */
 (function(){
 const T = window.T = {};
 const $ = id => document.getElementById(id);
@@ -124,7 +124,7 @@ T.countdown = function(cb){
 T.fullscreen = function(){ const el=document.documentElement,req=el.requestFullscreen||el.webkitRequestFullscreen;
   if(!req||document.fullscreenElement||document.webkitFullscreenElement)return; try{const p=req.call(el);p&&p.catch&&p.catch(()=>{})}catch(e){} };
 
-/* ---------- 過關碼與集章 ---------- */
+/* ---------- 關卡與過關畫面 ---------- */
 T.STATIONS = [
   {id:'drop',   name:'台語接接樂', icon:'🏮', url:'/drop',    desc:'接住掉落的台語詞'},
   {id:'duel',   name:'搶答對決',   icon:'⚔️', url:'/duel',    desc:'兩人比快，先拿分的贏'},
@@ -133,19 +133,10 @@ T.STATIONS = [
   {id:'speak',  name:'講台語挑戰', icon:'🎤', url:'/speak',   desc:'看華語，講台語'},
   {id:'bingo',  name:'台語賓果',   icon:'🎯', url:'/bingo',   desc:'聽台語，連成一線'}
 ];
-T.REWARD_AT = 4; // 集滿幾章可兌換
-const SALT='taigi-booth-2026';
-function h(s){let x=0x811c9dc5;for(let i=0;i<s.length;i++){x^=s.charCodeAt(i);x=Math.imul(x,0x01000193)>>>0}return x.toString(36)}
-T.passSig = (g,t) => h(g+'|'+t+'|'+SALT);
-T.passUrl = g => { const t=Date.now().toString(36); return `${location.origin}/pass?g=${g}&t=${t}&k=${T.passSig(g,t)}`; };
-T.verifyPass = (g,t,k) => { if(!T.STATIONS.some(s=>s.id===g)||!t||k!==T.passSig(g,t))return 'bad';
-  const age=Date.now()-parseInt(t,36); return (age<-60e3||age>20*60e3)?'old':'ok'; };
-T.stamps = () => T.store.get('tg_stamps',{});
-T.addStamp = g => { const s=T.stamps(); const isNew=!s[g]; if(isNew){s[g]=Date.now();T.store.set('tg_stamps',s)} return isNew; };
-T.showPass = function(el, g, title='過關！掃描集章'){
-  const url=T.passUrl(g);
-  let svg='';
-  try{ const q=qrcode(0,'M'); q.addData(url); q.make(); svg=q.createSvgTag({cellSize:4,margin:2,scalable:true}); }catch(e){ svg='<div class="muted">無法產生 QR code</div>'; }
-  el.innerHTML=`<div class="pass"><b>✅ ${T.esc(title)}</b><div class="qr">${svg}</div><div class="muted">用手機相機掃描，在「闖關集章卡」蓋章（20 分鐘內有效）</div></div>`;
+// 過關／未過關大字結果，給關主看
+T.showResult = function(el, win, tip=''){
+  el.innerHTML = win
+    ? `<div class="pass"><div class="ok-big">🎉 過關！</div><b>請把畫面給關主看</b>${tip?`<div class="muted">${T.esc(tip)}</div>`:''}</div>`
+    : `<div class="fail">${T.esc(tip||'這次沒過關，再挑戰一次吧！')}</div>`;
 };
 })();

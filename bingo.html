@@ -9,7 +9,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@500;700&family=Noto+Sans+TC:wght@500;700;900&family=Noto+Serif+TC:wght@900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="common.css">
-<script src="lib/qrcode.js"></script>
 <script src="common.js"></script>
 <title>台語賓果・台語闖關</title>
 <style>
@@ -123,11 +122,11 @@ function playerView(){view('vPlayer');$('pCode').textContent=code;const done=new
   $('bingoT').classList.toggle('on',gotBingo)}
 $('card').addEventListener('click',e=>{const c=e.target.closest('.cell');if(!c)return;const i=+c.dataset.i;marks[i]=!marks[i];T.sfx.flip();
   const had=gotBingo;if(!gotBingo&&lines().length){gotBingo=true}savePlayer();playerView();
-  if(gotBingo&&!had){T.sfx.win();T.confetti(innerWidth/2,innerHeight/3,50);T.showPass($('passBox'),'bingo','賓果！請主持人核對後掃描集章')}});
+  if(gotBingo&&!had){T.sfx.win();T.confetti(innerWidth/2,innerHeight/3,50);T.showResult($('passBox'),true,'請主持人核對已抽出的詞')}});
 $('leave').onclick=()=>{if(window.confirm('離開這局？賓果卡會清掉。')){T.store.set('bingo_player',null);$('passBox').innerHTML='';view('vMode')}};
 function resume(){const h=T.store.get('bingo_host',null),p=T.store.get('bingo_player',null);
   if(p&&p.code){code=p.code;const s=roundSet(code);const m=new Map(s.map(w=>[w.hj,w]));cardW=p.card.map(k=>m.get(k)).filter(Boolean);
-    if(cardW.length===16){marks=p.marks;gotBingo=p.gotBingo;playerView();if(gotBingo)T.showPass($('passBox'),'bingo','賓果！請主持人核對後掃描集章');return}}
+    if(cardW.length===16){marks=p.marks;gotBingo=p.gotBingo;playerView();if(gotBingo)T.showResult($('passBox'),true,'請主持人核對已抽出的詞');return}}
   if(h&&h.code){code=h.code;set=roundSet(code);drawn=h.drawn||[];hostView()}}
 </script>
 </body>

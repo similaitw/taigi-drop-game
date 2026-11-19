@@ -9,7 +9,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@500;700&family=Noto+Sans+TC:wght@500;700;900&family=Noto+Serif+TC:wght@900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="common.css">
-<script src="lib/qrcode.js"></script>
 <script src="common.js"></script>
 <title>俗語接龍・台語闖關</title>
 <style>
@@ -53,7 +52,7 @@
 <div class="overlay hide" id="endOv"><div class="panel" style="text-align:center">
   <h1 id="endTitle"></h1><div class="big-num" id="endScore">0</div><p class="sub" id="endInfo"></p>
   <div id="passBox"></div>
-  <div class="row" style="justify-content:center"><button class="btn red" id="againBtn">再玩一次</button><a class="btn" href="/booth">集章卡</a><a class="btn" href="/">遊戲選單</a></div>
+  <div class="row" style="justify-content:center"><button class="btn red" id="againBtn">再玩一次</button><a class="btn" href="/">遊戲選單</a></div>
 </div></div>
 <script>
 const {$,shuffle,esc}=T;
@@ -84,7 +83,7 @@ function answer(btn){if(locked)return;locked=true;cancelAnimationFrame(raf);cons
   setTimeout(()=>{qi++;if(qi<N)show();else end()},2000)}
 function end(){playing=false;T.music.stop();const win=ok>=PASS;
   $('endTitle').textContent=win?'俗語達人！':'差一點點！';$('endScore').textContent=score;$('endInfo').textContent=`答對 ${ok} / ${N} 題`;
-  if(win){T.sfx.win();T.confetti(innerWidth/2,innerHeight/3,40);T.showPass($('passBox'),'proverb')}else{T.sfx.bad();$('passBox').innerHTML=`<div class="fail">要答對 ${PASS} 題才過關，再試一次！</div>`}
+  if(win){T.sfx.win();T.confetti(innerWidth/2,innerHeight/3,40);T.showResult($('passBox'),true)}else{T.sfx.bad();$('passBox').innerHTML=`<div class="fail">要答對 ${PASS} 題才過關，再試一次！</div>`}
   $('endOv').classList.remove('hide');setTimeout(()=>T.music.play('title'),1600)}
 $('startBtn').onclick=start;$('againBtn').onclick=start;
 </script>
