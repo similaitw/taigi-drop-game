@@ -313,7 +313,7 @@ body.touch .hint{display:none}
     <div class="modes" id="modes">
       <div class="mode" data-m="easy"><b>入門</b><div class="st">★☆☆</div><span>生活常用詞</span></div>
       <div class="mode sel" data-m="mid"><b>進階</b><div class="st">★★☆</div><span>較少見詞・接錯扣分</span></div>
-      <div class="mode" data-m="hard"><b>達人</b><div class="st">★★★</div><span>俗語・形容詞・最快</span></div>
+      <div class="mode" data-m="hard"><b>達人</b><div class="st">★★★</div><span>少見詞・陷阱題・最快</span></div>
     </div>
     <div class="row">
       <input type="text" id="nameIn" placeholder="輸入玩家名字" maxlength="12">
@@ -419,39 +419,18 @@ const DEFAULT_WORDS = `菝仔|pa̍t-á|芭樂|1
 眠床|bîn-tshn̂g|床|1
 椅仔|í-á|椅子|1
 桌仔|toh-á|桌子|1
-先生|sian-sinn|老師|1
-囡仔|gín-á|小孩|1
 阿公|a-kong|爺爺|1
 阿媽|a-má|奶奶|1
-老爸|lāu-pē|爸爸|1
-老母|lāu-bú|媽媽|1
-阿兄|a-hiann|哥哥|1
-阿姊|a-tsí|姊姊|1
-小弟|sió-tī|弟弟|1
-小妹|sió-muē|妹妹|1
-查埔|tsa-poo|男生|1
-查某|tsa-bóo|女生|1
 頭家|thâu-ke|老闆|1
 厝邊|tshù-pinn|鄰居|1
-逐家|ta̍k-ke|大家|1
-家己|ka-tī|自己|1
 食飯|tsia̍h-pn̄g|吃飯|1
 睏|khùn|睡覺|1
 行路|kiânn-lōo|走路|1
 洗身軀|sé-sin-khu|洗澡|1
-穿衫|tshīng-sann|穿衣服|1
-食飽未|tsia̍h-pá--buē|吃飽了沒|1
 多謝|to-siā|謝謝|1
-歹勢|pháinn-sè|不好意思|1
-無要緊|bô-iàu-kín|沒關係|1
-真好食|tsin hó-tsia̍h|很好吃|1
 歡喜|huann-hí|高興|1
 媠|suí|漂亮|1
 古錐|kóo-tsui|可愛|1
-寒|kuânn|冷|1
-燒|sio|燙|1
-緊|kín|快|1
-驚|kiann|害怕|1
 今仔日|kin-á-ji̍t|今天|1
 昨昏|tsa-hng|昨天|1
 明仔載|bîn-á-tsài|明天|1
@@ -479,21 +458,34 @@ const DEFAULT_WORDS = `菝仔|pa̍t-á|芭樂|1
 胡蠅|hôo-sîn|蒼蠅|1
 頭前|thâu-tsîng|前面|1
 後壁|āu-piah|後面|1
-頂面|tíng-bīn|上面|1
-遮|tsia|這裡|1
-遐|hia|那裡|1
 啥物|siánn-mih|什麼|1
+腹肚|pak-tóo|肚子|1
+尻川|kha-tshng|屁股|1
+頷頸|ām-kún|脖子|1
+目眉|ba̍k-bâi|眉毛|1
+喙鬚|tshuì-tshiu|鬍子|1
+嚨喉|nâ-âu|喉嚨|1
+手骨|tshiú-kut|手臂|1
+喙瀾|tshuì-nuā|口水|1
+目屎|ba̍k-sái|眼淚|1
+後生|hāu-senn|兒子|1
+查某囝|tsa-bóo-kiánn|女兒|1
+人客|lâng-kheh|客人|1
+天星|thinn-tshinn|星星|1
+拍雷|phah-luî|打雷|1
+落雪|lo̍h-seh|下雪|1
+透風|thàu-hong|颳風|1
+飛行機|hue-lîng-ki|飛機|1
+枝仔冰|ki-á-ping|冰棒|1
 手指|tshiú-tsí|戒指|2
 手指頭仔|tshiú-tsáinn-thâu-á|手指|2
 倒手爿|tò-tshiú-pîng|左邊|2
 正手爿|tsiànn-tshiú-pîng|右邊|2
-下跤|ē-kha|下面|2
 佗位|tó-uī|哪裡|2
 按怎|án-tsuánn|怎麼|2
 偌濟|guā-tsē|多少|2
 規工|kui-kang|整天|2
 透早|thàu-tsá|一大早|2
-中晝|tiong-tàu|中午|2
 下晡|ē-poo|下午|2
 暗暝|àm-mî|夜晚|2
 舊年|kū-nî|去年|2
@@ -505,7 +497,6 @@ const DEFAULT_WORDS = `菝仔|pa̍t-á|芭樂|1
 田蛤仔|tshân-kap-á|青蛙|2
 粉鳥|hún-tsiáu|鴿子|2
 火金蛄|hué-kim-koo|螢火蟲|2
-杜蚓|tōo-kún|蚯蚓|2
 番仔火|huan-á-hué|火柴|2
 鎖匙|só-sî|鑰匙|2
 面桶|bīn-tháng|臉盆|2
@@ -530,22 +521,37 @@ const DEFAULT_WORDS = `菝仔|pa̍t-á|芭樂|1
 柚仔|iū-á|柚子|2
 泔糜|ám-muê|稀飯|2
 飯丸|pn̄g-uân|飯糰|2
-豆奶|tāu-ling|豆漿|2
-滷卵|lóo-nn̄g|滷蛋|2
 蚵仔|ô-á|牡蠣|2
-開講|khai-káng|聊天|2
-洗喙|sé-tshuì|刷牙|2
-戇|gōng|傻|2
 歹看|pháinn-khuànn|醜|2
-大箍|tuā-khoo|胖|2
 瘦卑巴|sán-pi-pa|很瘦|2
 趣味|tshù-bī|有趣|2
 貧惰|pîn-tuānn|懶惰|2
-清氣|tshing-khì|乾淨|2
-垃圾|lah-sap|髒|2
-三八|sam-pat|不正經|2
-雞婆|ke-pô|愛管閒事|2
 落跑|lāu-pháu|逃跑|2
+跤頭趺|kha-thâu-u|膝蓋|2
+翁|ang|丈夫|2
+某|bóo|妻子|2
+新婦|sin-pū|媳婦|2
+囝婿|kiánn-sài|女婿|2
+親情|tshin-tsiânn|親戚|2
+同窗|tâng-tshong|同學|2
+爍爁|sih-nah|閃電|2
+雺霧|bông-bū|霧|2
+虹|khīng|彩虹|2
+狗蟻|káu-hiā|螞蟻|2
+草蜢仔|tsháu-meh-á|蚱蜢|2
+蟳|tsîm|螃蟹|2
+柑仔店|kam-á-tiàm|雜貨店|2
+麭|pháng|麵包|2
+菜脯|tshài-póo|蘿蔔乾|2
+豆油|tāu-iû|醬油|2
+鼎|tiánn|鍋子|2
+飯匙|pn̄g-sî|飯勺|2
+蠓罩|báng-tà|蚊帳|2
+簿仔|phōo-á|筆記本|2
+擦仔|tshit-á|橡皮擦|2
+物件|mi̍h-kiānn|東西|2
+代誌|tāi-tsì|事情|2
+時陣|sî-tsūn|時候|2
 厚話|kāu-uē|話很多|3
 臭彈|tshàu-tuānn|吹牛|3
 好禮|hó-lé|有禮貌|3
@@ -560,34 +566,32 @@ const DEFAULT_WORDS = `菝仔|pa̍t-á|芭樂|1
 礙虐|gāi-gio̍h|彆扭|3
 囂俳|hiau-pai|囂張|3
 抾捔|khioh-ka̍k|沒用|3
-食緊挵破碗|tsia̍h kín lòng phuà uánn|欲速則不達|3
-摸蜊仔兼洗褲|bong lâ-á kiam sé khòo|一舉兩得|3
-人兩跤，錢四跤|lâng nn̄g kha, tsînn sì kha|錢難賺|3
-大隻雞慢啼|tuā-tsiah ke bān thî|大器晚成|3
-食果子拜樹頭|tsia̍h kué-tsí pài tshiū-thâu|飲水思源|3
-閹雞趁鳳飛|iam-ke thàn hōng pue|不自量力|3
-一枝草一點露|tsi̍t ki tsháu tsi̍t tiám lōo|天無絕人之路|3
-目睭糊著蜊仔肉|ba̍k-tsiu kôo-tio̍h lâ-á-bah|有眼無珠|3
-龜笑鱉無尾|ku tshiò pih bô bué|五十步笑百步|3
-戲棚跤徛久就是你的|hì-pênn-kha khiā kú tō sī lí ê|堅持就會成功|3
-未曾學行先學飛|buē-tsîng o̍h kiânn sing o̍h pue|好高騖遠|3
-好心予雷唚|hó-sim hōo luî tsim|好心沒好報|3
-虎頭鳥鼠尾|hóo-thâu niáu-tshí-bué|虎頭蛇尾|3
 鴨仔聽雷|ah-á thiann luî|聽不懂|3
-雞仔腸鳥仔肚|ke-á-tn̂g tsiáu-á-tōo|心胸狹窄|3
-袂曉駛船嫌溪彎|bē-hiáu sái tsûn hiâm khe uan|推卸責任|3
-一樣米飼百樣人|tsi̍t iūnn bí tshī pah iūnn lâng|人各有不同|3
-牛牽到北京嘛是牛|gû khan kàu Pak-kiann mā sī gû|本性難移|3
-食人一口，還人一斗|tsia̍h lâng tsi̍t kháu, hîng lâng tsi̍t táu|知恩圖報|3
-細漢偷挽匏，大漢偷牽牛|sè-hàn thau bán pû, tuā-hàn thau khan gû|小時偷針大偷金|3
-三日無餾，爬上樹|sann ji̍t bô liū, peh tsiūnn tshiū|不複習就忘|3
-緊紡無好紗|kín pháng bô hó se|急就做不好|3
-食米毋知米價|tsia̍h bí m̄ tsai bí kè|不知民間疾苦|3
 近廟欺神|kīn biō khi sîn|近而不敬|3
-有喙講甲無瀾|ū tshuì kóng kah bô nuā|說到口乾|3
-樹頭徛予在，毋驚樹尾做風颱|tshiū-thâu khiā hōo tsāi, m̄ kiann tshiū-bué tsò hong-thai|身正不怕影斜|3
-在厝日日好，出外朝朝難|tsāi tshù ji̍t-ji̍t hó, tshut-guā tiâu-tiâu lân|出門在外難|3
-仙拚仙，拚死猴齊天|sian piànn sian, piànn sí kâu-tsê-thian|池魚之殃|3`;
+大家|ta-ke|婆婆|3
+大官|ta-kuann|公公|3
+序大|sī-tuā|長輩|3
+序細|sī-sè|晚輩|3
+鯪鯉|lâ-lí|穿山甲|3
+暗光鳥|àm-kong-tsiáu|夜貓子|3
+飫|uì|膩|3
+好額|hó-gia̍h|有錢|3
+散赤|sàn-tshiah|貧窮|3
+古意|kóo-ì|老實|3
+青|tshenn|綠|3
+快|khuài|容易|3
+攏|lóng|都|3
+猶未|iáu-buē|還沒|3
+按呢|án-ne|這樣|3
+頇顢|hân-bān|笨拙|3
+躼跤|lò-kha|高個子|3
+見笑|kiàn-siàu|丟臉|3
+細膩|sè-jī|小心|3
+捌|bat|認識|3
+無閒|bô-îng|忙碌|3
+袂穤|bē-bái|不錯|3
+勇|ióng|強壯|3
+歹|pháinn|兇|3`;
 
 const MODES={
   easy:{name:'入門',levels:[1],dur:[5.6,3.4],pen:0},
@@ -604,7 +608,7 @@ function parseWords(txt){
     return {hj:p[0]||'',tl:p[1]||'',zh:p[2]||'',lv:Math.min(3,Math.max(1,parseInt(p[3])||1))};
   }).filter(w=>w.hj&&w.zh);
 }
-let wordText=store.get('tg2_words',DEFAULT_WORDS);
+let wordText=store.get('tg3_words',DEFAULT_WORDS);
 let WORDS=parseWords(wordText);
 if(WORDS.length<8){wordText=DEFAULT_WORDS;WORDS=parseWords(wordText)}
 
@@ -912,7 +916,7 @@ $('closeEdit').onclick=()=>$('editOv').classList.add('hide');
 $('resetWords').onclick=()=>{$('wordTA').value=DEFAULT_WORDS};
 $('saveWords').onclick=()=>{const w=parseWords($('wordTA').value);
   if(w.length<8||new Set(w.map(x=>x.zh)).size<4){$('editMsg').textContent='至少需要 8 個詞、4 種以上不同的華語意思喔！';return}
-  wordText=$('wordTA').value;WORDS=w;store.set('tg2_words',wordText);$('editOv').classList.add('hide')};
+  wordText=$('wordTA').value;WORDS=w;store.set('tg3_words',wordText);$('editOv').classList.add('hide')};
 
 // 待機時吉祥物偶爾講話
 setInterval(()=>{if(state==='idle')return;},4000);
