@@ -126,7 +126,7 @@ T.fullscreen = function(){ const el=document.documentElement,req=el.requestFulls
 
 /* ---------- 過關碼與集章 ---------- */
 T.STATIONS = [
-  {id:'drop',   name:'台語接接樂', icon:'🏮', url:'/',        desc:'接住掉落的台語詞'},
+  {id:'drop',   name:'台語接接樂', icon:'🏮', url:'/drop',    desc:'接住掉落的台語詞'},
   {id:'duel',   name:'搶答對決',   icon:'⚔️', url:'/duel',    desc:'兩人比快，先拿分的贏'},
   {id:'memory', name:'翻牌記憶',   icon:'🃏', url:'/memory',  desc:'台語華語配成對'},
   {id:'proverb',name:'俗語接龍',   icon:'📜', url:'/proverb', desc:'接出俗語的下半句'},
