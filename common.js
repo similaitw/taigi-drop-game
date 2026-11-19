@@ -142,7 +142,7 @@ T.STATIONS = [
 // 過關／未過關大字結果，給關主看
 T.showResult = function(el, win, tip=''){
   el.innerHTML = win
-    ? `<div class="pass"><div class="ok-big">🎉 過關！</div><b>請把畫面給關主看</b>${tip?`<div class="muted">${T.esc(tip)}</div>`:''}</div>`
+    ? `<div class="pass"><div class="ok-big">🎉 過關！</div>${tip?`<div class="muted">${T.esc(tip)}</div>`:''}</div>`
     : `<div class="fail">${T.esc(tip||'這次沒過關，再挑戰一次吧！')}</div>`;
 };
 })();
