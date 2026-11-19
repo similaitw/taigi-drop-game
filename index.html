@@ -330,12 +330,12 @@ body.touch .hint{display:none}
     </div>
     <div class="row">
       <button class="btn red" id="startBtn" style="flex:1;font-size:22px">開始遊戲 ▶</button>
-      <button class="btn" id="editBtn">詞庫</button>
     </div>
     <h2>🏆 排行榜</h2>
     <div class="boardtabs" id="tabs1"></div>
     <ol class="board" id="board"></ol>
     <div class="row" style="justify-content:flex-end"><button class="btn" id="clearBoard" style="font-size:13px;padding:5px 12px;box-shadow:0 3px 0 #3a2a1e">清除這個排行榜</button></div>
+    <div class="muted" style="display:flex;justify-content:space-between;margin-top:8px"><span id="srcInfo">題庫：內建</span><a href="admin" style="color:#8a6f58">題庫管理</a></div>
   </div>
 </div>
 
@@ -678,9 +678,23 @@ function parseWords(txt){
     return {hj:p[0]||'',tl:p[1]||'',zh:p[2]||'',lv:Math.min(3,Math.max(1,parseInt(p[3])||1))};
   }).filter(w=>w.hj&&w.zh);
 }
-let wordText=store.get('tg4_words',DEFAULT_WORDS);
-let WORDS=parseWords(wordText);
-if(WORDS.length<8){wordText=DEFAULT_WORDS;WORDS=parseWords(wordText)}
+let wordText=DEFAULT_WORDS;
+let WORDS=parseWords(DEFAULT_WORDS);
+let wordSource='內建';
+// 雲端題庫：先用上次快取，再向伺服器拿最新版
+(function(){
+  const cached=store.get('tg_cloud_words',null);
+  if(cached&&Array.isArray(cached.words)&&cached.words.length>=8){WORDS=cached.words;wordSource='雲端（離線快取）'}
+  if(!/^https?:/.test(location.protocol))return;
+  fetch('/api/words',{cache:'no-cache'}).then(r=>r.ok?r.json():null).then(j=>{
+    if(j&&Array.isArray(j.words)&&j.words.length>=8){
+      WORDS=j.words.map(w=>({hj:w.hj,tl:w.tl||'',zh:w.zh,lv:+w.lv||1}));wordSource='雲端';
+      store.set('tg_cloud_words',{updatedAt:j.updatedAt,words:WORDS});
+    }
+    showSource();
+  }).catch(()=>showSource());
+})();
+function showSource(){const el=document.getElementById('srcInfo');if(el)el.textContent=`題庫：${wordSource}・${WORDS.length} 詞`}
 
 const $=id=>document.getElementById(id);
 const field=$('field'),tile=$('tile'),lanesEl=$('lanes'),mascot=$('mascot');
@@ -845,7 +859,7 @@ function selectMode(m){mode=m;store.set('tg2_mode',m);boardMode=m;
   [...document.querySelectorAll('.mode')].forEach(x=>x.classList.toggle('sel',x.dataset.m===m));
   $('modeTag').textContent=MODES[m].name;updateBest();renderTabs();renderBoard($('board'),m)}
 document.querySelectorAll('.mode').forEach(x=>x.onclick=()=>{selectMode(x.dataset.m);audioInit();sfx.tick()});
-selectMode(mode);
+selectMode(mode);showSource();
 function setSpeed(v){speedMul=Math.min(2.5,Math.max(0.5,Math.round(v*10)/10));$('speedIn').value=speedMul;$('speedOut').textContent=speedMul.toFixed(1)+'×';store.set('tg2_speed',speedMul)}
 $('speedIn').oninput=e=>setSpeed(+e.target.value);
 document.querySelectorAll('.speedrow .sp button').forEach(b=>b.onclick=()=>setSpeed(+b.dataset.v));
@@ -981,7 +995,7 @@ $('stopBtn').onclick=()=>{if(state==='play'){endGame()}else if(state==='count'){
 $('sameBtn').onclick=()=>{if($('fsAuto').checked)enterFS();startGame()};
 $('againBtn').onclick=()=>{$('endOv').classList.add('hide');$('nameIn').value='';renderBoard($('board'),boardMode);$('startOv').classList.remove('hide');state='idle';setTimeout(()=>$('nameIn').focus(),60)};
 $('clearBoard').onclick=()=>{store.set('tg2_board_'+boardMode,[]);store.set('tg2_best_'+boardMode,0);updateBest();renderBoard($('board'),boardMode)};
-$('editBtn').onclick=()=>{$('wordTA').value=wordText;$('wcount').textContent=WORDS.length;$('editMsg').textContent='';$('editOv').classList.remove('hide')};
+if(false)$('editBtn').onclick=()=>{$('wordTA').value=wordText;$('wcount').textContent=WORDS.length;$('editMsg').textContent='';$('editOv').classList.remove('hide')};
 $('closeEdit').onclick=()=>$('editOv').classList.add('hide');
 $('resetWords').onclick=()=>{$('wordTA').value=DEFAULT_WORDS};
 $('saveWords').onclick=()=>{const w=parseWords($('wordTA').value);

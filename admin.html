@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>台語接接樂・題庫管理</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@500;700&family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#2b1d14;--red:#d9412b;--gold:#f6c343;--teal:#1f8a7f;--cream:#fff6e4;--line:#3a2a1e;--ok:#25a566;--bad:#e04436;--warn:#c78f12}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans TC",system-ui,sans-serif;color:var(--ink);background:#fbefd9;min-height:100vh}
+button,input,select,textarea{font-family:inherit;font-size:15px}
+.btn{border:2px solid var(--line);border-radius:12px;padding:8px 14px;font-weight:900;cursor:pointer;background:#fff;box-shadow:0 3px 0 var(--line);white-space:nowrap}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--line)}
+.btn.red{background:var(--red);color:#fff}.btn.teal{background:var(--teal);color:#fff}.btn.gold{background:var(--gold)}
+.btn.sm{padding:4px 9px;font-size:13px;border-radius:9px;box-shadow:0 2px 0 var(--line)}
+.btn:disabled{opacity:.5;cursor:default}
+input[type=text],input[type=password],input[type=search],select,textarea{border:2px solid var(--line);border-radius:10px;padding:7px 10px;background:#fff;color:var(--ink)}
+.tl{font-family:"Noto Sans","Noto Sans TC",sans-serif}
+
+/* 登入 */
+#login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+.card{background:var(--cream);border:3px solid var(--line);border-radius:22px;box-shadow:0 8px 0 var(--line);padding:26px;width:100%;max-width:380px;text-align:center}
+.card h1{margin:0 0 4px;color:var(--red);font-size:28px}
+.card input{width:100%;margin:16px 0 10px;font-size:18px;padding:10px 12px}
+.err{color:var(--bad);font-weight:700;min-height:22px;margin-top:8px}
+
+/* 主畫面 */
+#main{display:none;max-width:1100px;margin:0 auto;padding:14px}
+header{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+header h1{margin:0;font-size:22px;color:var(--red);margin-right:auto}
+header h1 small{font-size:13px;color:#7a5f48;font-weight:700;margin-left:6px}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.chip{background:#fff;border:2px solid var(--line);border-radius:99px;padding:3px 12px;font-weight:900;font-size:14px}
+.chip b{color:var(--red)}
+.chip.warn{background:#fff3cf;border-color:var(--warn)}
+.panel{background:var(--cream);border:3px solid var(--line);border-radius:18px;padding:14px;margin-bottom:14px}
+.panel h2{margin:0 0 10px;font-size:18px;display:flex;align-items:center;gap:8px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.toolbar input[type=search]{flex:1;min-width:160px}
+.banner{background:#fff3cf;border:2px solid var(--warn);border-radius:12px;padding:8px 12px;font-weight:700;margin-bottom:10px;display:none}
+.banner.show{display:block}
+.dirty{color:var(--bad);font-weight:900;display:none}
+.dirty.show{display:inline}
+
+.tablewrap{max-height:62vh;overflow:auto;border:2px solid var(--line);border-radius:12px;background:#fff}
+table{border-collapse:collapse;width:100%}
+th{position:sticky;top:0;background:var(--teal);color:#fff;font-size:13px;padding:8px 6px;text-align:left;z-index:1}
+td{border-top:1px solid #eadcc6;padding:4px 5px;vertical-align:middle}
+tr:nth-child(even) td{background:#fffaf0}
+td input,td select{width:100%;border:1.5px solid transparent;border-radius:7px;padding:5px 6px;background:transparent}
+td input:hover,td select:hover{border-color:#d9c6a6}
+td input:focus,td select:focus{border-color:var(--teal);background:#fff;outline:none}
+td.n{width:42px;color:#a08a74;font-size:12px;text-align:right}
+td.lv{width:92px} td.act{width:44px;text-align:center}
+td.flag{width:26px;text-align:center}
+.del{border:none;background:none;cursor:pointer;font-size:17px;color:#b49a82}
+.del:hover{color:var(--bad)}
+.f{display:inline-block;width:18px;height:18px;border-radius:50%;font-size:11px;line-height:18px;font-weight:900;color:#fff;cursor:help}
+.f.w{background:var(--warn)}.f.e{background:var(--bad)}
+tr.new td{background:#eafaf4!important}
+
+.vers{display:flex;flex-direction:column;gap:6px;max-height:340px;overflow:auto}
+.ver{display:flex;align-items:center;gap:10px;background:#fff;border:2px solid #e3cfb0;border-radius:12px;padding:7px 10px;flex-wrap:wrap}
+.ver .t{font-weight:900;min-width:150px}
+.ver .c{color:#7a5f48;font-size:13px;flex:1}
+.ver .cur{background:var(--ok);color:#fff;border-radius:99px;padding:1px 8px;font-size:12px;font-weight:900}
+.muted{color:#7a5f48;font-size:13px}
+
+.ovl{position:fixed;inset:0;background:rgba(43,29,20,.5);display:none;align-items:center;justify-content:center;padding:14px;z-index:20}
+.ovl.show{display:flex}
+.modal{background:var(--cream);border:3px solid var(--line);border-radius:20px;box-shadow:0 8px 0 var(--line);padding:18px;width:100%;max-width:640px;max-height:92vh;overflow:auto}
+.modal h2{margin:0 0 8px}
+.modal textarea{width:100%;height:240px;font-size:14px;line-height:1.5}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(30px);background:var(--line);color:#fff;font-weight:900;padding:10px 18px;border-radius:99px;opacity:0;transition:.25s;z-index:30;pointer-events:none}
+#toast.show{opacity:1;transform:translateX(-50%)}
+#toast.bad{background:var(--bad)}
+@media (max-width:640px){td.n,th.n{display:none}td.lv{width:70px}}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <form class="card" id="loginForm">
+    <div style="font-size:44px">🔐</div>
+    <h1>題庫管理</h1>
+    <div class="muted">台語接接樂・管理員登入</div>
+    <input type="password" id="pw" placeholder="管理密碼" autocomplete="current-password" autofocus>
+    <button class="btn red" style="width:100%;font-size:18px" id="loginBtn">登入</button>
+    <div class="err" id="loginErr"></div>
+    <a href="/" class="muted">← 回遊戲</a>
+  </form>
+</div>
+
+<div id="main">
+  <header>
+    <h1>🏮 題庫管理 <small id="verInfo"></small></h1>
+    <a class="btn sm" href="/" target="_blank">開遊戲</a>
+    <button class="btn sm" id="logoutBtn">登出</button>
+  </header>
+
+  <div class="banner" id="banner"></div>
+
+  <div class="panel">
+    <h2>📚 詞庫 <span class="dirty" id="dirty">● 尚未儲存</span></h2>
+    <div class="stats" id="stats"></div>
+    <div class="toolbar">
+      <input type="search" id="q" placeholder="搜尋台語、台羅或華語…">
+      <select id="fLv"><option value="">全部等級</option><option value="1">1 入門</option><option value="2">2 進階</option><option value="3">3 達人</option></select>
+      <select id="fFlag"><option value="">全部</option><option value="flag">只看有提醒的</option></select>
+      <button class="btn sm teal" id="addBtn">＋ 新增</button>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th class="n">#</th><th></th><th>台語</th><th>台羅</th><th>華語</th><th>等級</th><th></th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="muted" style="margin-top:6px">提醒：<span class="f w">!</span> 超過 4 個字（牌子會擠）　<span class="f e">!</span> 重複、空白或含罕用字（可能破圖）</div>
+    <div class="row">
+      <input type="text" id="note" placeholder="這次修改的備註（選填）" style="flex:1;min-width:180px">
+      <button class="btn red" id="saveBtn">☁️ 儲存到雲端</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>🗂 備份與還原</h2>
+    <p class="muted" style="margin:0 0 10px">每次儲存都會在雲端留一個版本，最多保留最近 <b id="keepN">100</b> 個。按「還原」會把那個版本複製成最新版，目前的版本仍會保留，不會遺失。</p>
+    <div class="row" style="margin:0 0 10px">
+      <button class="btn sm" id="exportJson">⬇ 下載備份（JSON）</button>
+      <button class="btn sm" id="exportTxt">⬇ 下載文字檔</button>
+      <button class="btn sm gold" id="importBtn">⬆ 匯入</button>
+      <button class="btn sm" id="defaultBtn">載入預設詞庫</button>
+      <button class="btn sm" id="refreshVers">重新整理</button>
+    </div>
+    <div class="vers" id="vers"><div class="muted">讀取中…</div></div>
+  </div>
+</div>
+
+<div class="ovl" id="importOv">
+  <div class="modal">
+    <h2>⬆ 匯入詞庫</h2>
+    <p class="muted">貼上文字，一行一個：<b>台語|台羅|華語|等級</b>；或選一個之前下載的 .json／.txt 備份檔。</p>
+    <input type="file" id="importFile" accept=".json,.txt,.csv,text/plain,application/json">
+    <textarea id="importTA" class="tl" spellcheck="false" placeholder="菝仔|pa̍t-á|芭樂|1"></textarea>
+    <div class="row">
+      <label><input type="radio" name="im" value="append" checked> 加在後面</label>
+      <label><input type="radio" name="im" value="replace"> 整份取代</label>
+      <span style="flex:1"></span>
+      <button class="btn" id="importCancel">取消</button>
+      <button class="btn red" id="importOk">匯入</button>
+    </div>
+    <div class="err" id="importErr"></div>
+  </div>
+</div>
+
+<div class="ovl" id="viewOv">
+  <div class="modal">
+    <h2 id="viewTitle">版本內容</h2>
+    <div class="muted" id="viewInfo"></div>
+    <div class="tablewrap" style="max-height:50vh;margin-top:8px"><table><thead><tr><th>台語</th><th>台羅</th><th>華語</th><th>級</th></tr></thead><tbody id="viewBody"></tbody></table></div>
+    <div class="row"><span style="flex:1"></span><button class="btn" id="viewClose">關閉</button><button class="btn sm" id="viewDl">⬇ 下載</button><button class="btn red" id="viewRestore">還原這個版本</button></div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const LV={1:'入門',2:'進階',3:'達人'};
+let token='',words=[],dirty=false,currentId=null,viewing=null,nextKey=1;
+try{token=sessionStorage.getItem('tg_admin')||''}catch(e){}
+
+function toast(msg,bad){const t=$('toast');t.textContent=msg;t.className='show'+(bad?' bad':'');clearTimeout(toast._t);toast._t=setTimeout(()=>t.className='',2600)}
+function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+async function api(path,opt={}){
+  const r=await fetch(path,{...opt,headers:{'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{}),...(opt.headers||{})}});
+  let j={};try{j=await r.json()}catch(e){}
+  if(r.status===401&&path!=='/api/login'){logout('登入已過期，請重新登入');throw new Error('未登入')}
+  if(!r.ok)throw new Error(j.error||('錯誤 '+r.status));
+  return j;
+}
+function fmt(t){return new Date(t).toLocaleString('zh-TW',{hour12:false,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'})}
+
+/* ===== 登入 ===== */
+$('loginForm').onsubmit=async e=>{
+  e.preventDefault();$('loginErr').textContent='';$('loginBtn').disabled=true;
+  try{const j=await api('/api/login',{method:'POST',body:JSON.stringify({password:$('pw').value})});
+    token=j.token;try{sessionStorage.setItem('tg_admin',token)}catch(e){}
+    $('pw').value='';enter();
+  }catch(err){$('loginErr').textContent=err.message}
+  $('loginBtn').disabled=false;
+};
+function logout(msg){token='';try{sessionStorage.removeItem('tg_admin')}catch(e){}
+  $('main').style.display='none';$('login').style.display='flex';if(msg)$('loginErr').textContent=msg}
+$('logoutBtn').onclick=()=>{if(dirty&&!window.confirm('有修改還沒儲存，確定要登出？'))return;logout()};
+async function enter(){
+  $('login').style.display='none';$('main').style.display='block';
+  await loadCurrent();loadVersions();
+}
+
+/* ===== 讀取 ===== */
+async function loadCurrent(){
+  try{
+    const j=await api('/api/words',{headers:{'Cache-Control':'no-cache'}});
+    if(j.words&&j.words.length){setWords(j.words,false);currentId=j.id;
+      $('verInfo').textContent=`雲端版本：${fmt(j.updatedAt)}${j.note?'・'+j.note:''}`;banner('')}
+    else{await loadDefault(true)}
+  }catch(e){if(e.message!=='未登入')toast('讀取失敗：'+e.message,true)}
+}
+async function loadDefault(first){
+  const r=await fetch('/words-default.json',{cache:'no-cache'});const j=await r.json();
+  setWords(j.words,true);
+  if(first){$('verInfo').textContent='雲端尚無資料';banner('雲端資料庫還是空的，已先載入預設詞庫。檢查後按「☁️ 儲存到雲端」，遊戲就會改用雲端題庫。')}
+}
+function banner(t){$('banner').textContent=t;$('banner').classList.toggle('show',!!t)}
+function setWords(arr,isDirty){words=arr.map(w=>({k:nextKey++,hj:w.hj||'',tl:w.tl||'',zh:w.zh||'',lv:+w.lv||1}));setDirty(isDirty);render()}
+function setDirty(d){dirty=d;$('dirty').classList.toggle('show',d)}
+addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue=''}});
+
+/* ===== 檢查 ===== */
+const rare=s=>[...s].some(c=>{const p=c.codePointAt(0);return (p>=0x3400&&p<=0x4DBF)||(p>=0x20000&&p<0x1F000)||p>=0x20000});
+function flags(){
+  const cH={},cZ={};words.forEach(w=>{cH[w.hj]=(cH[w.hj]||0)+1;cZ[w.zh]=(cZ[w.zh]||0)+1});
+  const m=new Map();
+  words.forEach(w=>{const f=[];
+    if(!w.hj.trim()||!w.zh.trim())f.push(['e','台語或華語是空白']);
+    if(cH[w.hj]>1)f.push(['e','台語重複']);
+    if(cZ[w.zh]>1)f.push(['e','華語答案重複（同一題可能出現兩個正確選項）']);
+    if(rare(w.hj+w.zh))f.push(['e','含罕用字，部分裝置會變方框']);
+    if([...w.hj].length>4||[...w.zh].length>4)f.push(['w','超過 4 個字，牌子或方塊會擠']);
+    if(f.length)m.set(w.k,f)});
+  return m;
+}
+function renderStats(fm){
+  const c={1:0,2:0,3:0};words.forEach(w=>c[w.lv]++);
+  const e=[...fm.values()].filter(f=>f.some(x=>x[0]==='e')).length,wn=fm.size-e;
+  $('stats').innerHTML=`<span class="chip">共 <b>${words.length}</b> 詞</span>`+
+    [1,2,3].map(l=>`<span class="chip">${LV[l]} <b>${c[l]}</b></span>`).join('')+
+    `<span class="chip muted">入門模式 ${c[1]}・進階模式 ${c[1]+c[2]}・達人模式 ${c[2]+c[3]}</span>`+
+    (e?`<span class="chip warn">需修正 <b>${e}</b></span>`:'')+(wn?`<span class="chip warn">偏長 <b>${wn}</b></span>`:'');
+}
+
+/* ===== 表格 ===== */
+function render(){
+  const fm=flags();renderStats(fm);
+  const q=$('q').value.trim().toLowerCase(),lv=$('fLv').value,ff=$('fFlag').value;
+  const rows=[];let i=0;
+  for(const w of words){i++;
+    if(lv&&String(w.lv)!==lv)continue;
+    if(ff&&!fm.has(w.k))continue;
+    if(q&&!(w.hj+' '+w.tl+' '+w.zh).toLowerCase().includes(q))continue;
+    const f=fm.get(w.k);
+    const fl=f?`<span class="f ${f.some(x=>x[0]==='e')?'e':'w'}" title="${esc(f.map(x=>x[1]).join('；'))}">!</span>`:'';
+    rows.push(`<tr data-k="${w.k}"${w._new?' class="new"':''}><td class="n">${i}</td><td class="flag">${fl}</td>
+      <td><input data-f="hj" value="${esc(w.hj)}"></td><td><input class="tl" data-f="tl" value="${esc(w.tl)}"></td>
+      <td><input data-f="zh" value="${esc(w.zh)}"></td>
+      <td class="lv"><select data-f="lv">${[1,2,3].map(l=>`<option value="${l}"${w.lv===l?' selected':''}>${l} ${LV[l]}</option>`).join('')}</select></td>
+      <td class="act"><button class="del" title="刪除">🗑</button></td></tr>`)}
+  $('tbody').innerHTML=rows.join('')||'<tr><td colspan="7" class="muted" style="padding:16px;text-align:center">沒有符合的詞</td></tr>';
+}
+const find=k=>words.find(w=>w.k===+k);
+$('tbody').addEventListener('input',e=>{const el=e.target,tr=el.closest('tr');if(!tr||!el.dataset.f)return;
+  const w=find(tr.dataset.k);w[el.dataset.f]=el.dataset.f==='lv'?+el.value:el.value;setDirty(true);
+  clearTimeout(render._t);render._t=setTimeout(()=>{const fm=flags();renderStats(fm);
+    document.querySelectorAll('#tbody tr[data-k]').forEach(r=>{const f=fm.get(+r.dataset.k);r.children[1].innerHTML=f?`<span class="f ${f.some(x=>x[0]==='e')?'e':'w'}" title="${esc(f.map(x=>x[1]).join('；'))}">!</span>`:''})},250)});
+$('tbody').addEventListener('change',e=>{if(e.target.dataset.f==='lv')render()});
+$('tbody').addEventListener('click',e=>{if(!e.target.classList.contains('del'))return;const tr=e.target.closest('tr');const w=find(tr.dataset.k);
+  words=words.filter(x=>x!==w);setDirty(true);render();toast(`已刪除「${w.hj||'空白'}」，記得儲存`)});
+['q','fLv','fFlag'].forEach(id=>$(id).addEventListener('input',render));
+$('addBtn').onclick=()=>{const w={k:nextKey++,hj:'',tl:'',zh:'',lv:+$('fLv').value||1,_new:true};words.unshift(w);
+  $('q').value='';$('fFlag').value='';setDirty(true);render();const inp=document.querySelector(`tr[data-k="${w.k}"] input`);inp&&inp.focus()};
+
+/* ===== 儲存 ===== */
+$('saveBtn').onclick=async()=>{
+  const fm=flags();const errs=[...fm.entries()].filter(([k,f])=>f.some(x=>x[0]==='e'&&x[1]!=='台語或華語是空白'));
+  const empty=words.filter(w=>!w.hj.trim()||!w.zh.trim());
+  if(errs.length&&!window.confirm(`有 ${errs.length} 個詞有重複或罕用字的問題，還是要儲存嗎？`))return;
+  if(empty.length&&!window.confirm(`有 ${empty.length} 列是空白，儲存時會自動略過，繼續？`))return;
+  $('saveBtn').disabled=true;$('saveBtn').textContent='儲存中…';
+  try{const j=await api('/api/words',{method:'POST',body:JSON.stringify({words:words.map(({hj,tl,zh,lv})=>({hj,tl,zh,lv})),note:$('note').value})});
+    words.forEach(w=>delete w._new);words=words.filter(w=>w.hj.trim()&&w.zh.trim());
+    setDirty(false);render();currentId=j.id;$('note').value='';banner('');
+    $('verInfo').textContent=`雲端版本：${fmt(j.updatedAt)}${j.note?'・'+j.note:''}`;
+    toast(`✓ 已儲存 ${j.count} 詞到雲端`);loadVersions();
+  }catch(e){if(e.message!=='未登入')toast('儲存失敗：'+e.message,true)}
+  $('saveBtn').disabled=false;$('saveBtn').textContent='☁️ 儲存到雲端';
+};
+
+/* ===== 備份 ===== */
+async function loadVersions(){
+  try{const j=await api('/api/backups');$('keepN').textContent=j.keep;
+    $('vers').innerHTML=j.versions.length?j.versions.map((v,i)=>`<div class="ver"><span class="t">${fmt(v.time)}</span>
+      <span class="c">${v.count} 詞${i===0?' <span class="cur">目前使用中</span>':''}</span>
+      <button class="btn sm" data-view="${esc(v.id)}">查看</button>
+      <button class="btn sm" data-dl="${esc(v.id)}">下載</button>
+      ${i?`<button class="btn sm red" data-restore="${esc(v.id)}">還原</button>`:''}</div>`).join(''):'<div class="muted">還沒有任何雲端版本，儲存一次就會出現。</div>';
+  }catch(e){if(e.message!=='未登入')$('vers').innerHTML=`<div class="err">讀取備份失敗：${esc(e.message)}</div>`}
+}
+$('refreshVers').onclick=loadVersions;
+$('vers').addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.view)return viewVersion(b.dataset.view);
+  if(b.dataset.dl){try{const j=await api('/api/backups?id='+encodeURIComponent(b.dataset.dl));download(j.words,'json',j.updatedAt)}catch(err){toast(err.message,true)}return}
+  if(b.dataset.restore)restore(b.dataset.restore);
+});
+async function viewVersion(id){
+  try{const j=await api('/api/backups?id='+encodeURIComponent(id));viewing=j;
+    $('viewTitle').textContent='版本：'+fmt(j.updatedAt);
+    $('viewInfo').textContent=`${j.count} 詞${j.note?'・備註：'+j.note:''}`;
+    $('viewBody').innerHTML=j.words.map(w=>`<tr><td>${esc(w.hj)}</td><td class="tl">${esc(w.tl)}</td><td>${esc(w.zh)}</td><td>${w.lv}</td></tr>`).join('');
+    $('viewRestore').style.display=id===currentId?'none':'';
+    $('viewOv').classList.add('show');
+  }catch(e){toast(e.message,true)}
+}
+$('viewClose').onclick=()=>$('viewOv').classList.remove('show');
+$('viewDl').onclick=()=>viewing&&download(viewing.words,'json',viewing.updatedAt);
+$('viewRestore').onclick=()=>{$('viewOv').classList.remove('show');restore(viewing.id)};
+async function restore(id){
+  if(dirty&&!window.confirm('目前畫面上有還沒儲存的修改，還原後會被取代。繼續？'))return;
+  if(!window.confirm('確定要還原這個版本嗎？目前的版本仍會保留在備份裡。'))return;
+  try{const j=await api('/api/backups',{method:'POST',body:JSON.stringify({restore:id})});toast(`✓ 已還原（${j.count} 詞）`);await loadCurrent();loadVersions()}
+  catch(e){toast('還原失敗：'+e.message,true)}
+}
+
+/* ===== 匯出／匯入 ===== */
+function download(arr,type,when){
+  const d=new Date(when||Date.now()),stamp=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'-'+String(d.getHours()).padStart(2,'0')+String(d.getMinutes()).padStart(2,'0');
+  const list=arr.map(({hj,tl,zh,lv})=>({hj,tl,zh,lv}));
+  const content=type==='json'?JSON.stringify({exportedAt:new Date().toISOString(),count:list.length,words:list},null,1):list.map(w=>[w.hj,w.tl,w.zh,w.lv].join('|')).join('\n');
+  const blob=new Blob([content],{type:type==='json'?'application/json':'text/plain'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`台語接接樂題庫-${stamp}.${type}`;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);
+}
+$('exportJson').onclick=()=>download(words,'json');
+$('exportTxt').onclick=()=>download(words,'txt');
+$('defaultBtn').onclick=async()=>{if(!window.confirm('用預設詞庫取代畫面上的詞庫？（要按儲存才會寫進雲端）'))return;await loadDefault(false);toast('已載入預設詞庫，記得儲存')};
+$('importBtn').onclick=()=>{$('importTA').value='';$('importErr').textContent='';$('importFile').value='';$('importOv').classList.add('show')};
+$('importCancel').onclick=()=>$('importOv').classList.remove('show');
+$('importFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;const t=await f.text();
+  try{const j=JSON.parse(t);const arr=Array.isArray(j)?j:j.words;$('importTA').value=arr.map(w=>[w.hj,w.tl,w.zh,w.lv].join('|')).join('\n')}
+  catch(err){$('importTA').value=t}};
+function parseLines(t){return t.split(/\r?\n/).map(l=>l.trim()).filter(l=>l&&!l.startsWith('#')).map(l=>{
+  const p=(l.includes('|')?l.split('|'):l.includes('\t')?l.split('\t'):l.split(',')).map(s=>s.trim());
+  return {hj:p[0]||'',tl:p[1]||'',zh:p[2]||'',lv:Math.min(3,Math.max(1,parseInt(p[3])||1))}}).filter(w=>w.hj&&w.zh)}
+$('importOk').onclick=()=>{const arr=parseLines($('importTA').value);
+  if(!arr.length){$('importErr').textContent='沒有讀到任何詞，請確認格式：台語|台羅|華語|等級';return}
+  const mode=document.querySelector('input[name=im]:checked').value;
+  const add=arr.map(w=>({k:nextKey++,...w,_new:true}));
+  if(mode==='replace')words=add;else{const have=new Set(words.map(w=>w.hj));const fresh=add.filter(w=>!have.has(w.hj));words=words.concat(fresh);
+    if(fresh.length<add.length)toast(`略過 ${add.length-fresh.length} 個已存在的台語詞`)}
+  setDirty(true);render();$('importOv').classList.remove('show');toast(`已匯入 ${arr.length} 筆，記得儲存`)};
+
+/* 啟動：有登入憑證就直接進入 */
+if(token)enter();
+</script>
+</body>
+</html>
