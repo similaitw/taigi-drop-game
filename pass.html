@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#d9412b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@500;700&family=Noto+Sans+TC:wght@500;700;900&family=Noto+Serif+TC:wght@900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="common.css">
+<script src="lib/qrcode.js"></script>
+<script src="common.js"></script>
+<title>蓋章・台語闖關</title>
+<style>
+.box{max-width:460px;margin:8vh auto 0;text-align:center}
+.seal{width:150px;height:150px;margin:16px auto;border:7px solid var(--red);border-radius:50%;color:var(--red);font-family:"Noto Serif TC",serif;font-weight:900;font-size:44px;display:flex;align-items:center;justify-content:center;transform:rotate(-15deg);background:#fff;animation:stamp .7s cubic-bezier(.2,1.6,.4,1)}
+.seal.no{border-color:#999;color:#999}
+@keyframes stamp{from{transform:rotate(-15deg) scale(3);opacity:0}to{transform:rotate(-15deg) scale(1);opacity:1}}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="panel box" id="box"></div></div>
+<script>
+const q=new URLSearchParams(location.search),g=q.get('g'),st=T.STATIONS.find(s=>s.id===g);
+const r=T.verifyPass(g,q.get('t'),q.get('k'));
+const box=T.$('box');
+if(r==='ok'){
+  const isNew=T.addStamp(g);
+  box.innerHTML=`<div style="font-size:48px">${st.icon}</div><h1>${isNew?'蓋章成功！':'已經蓋過囉'}</h1>
+    <div class="seal">過關</div><p class="sub">「${st.name}」${isNew?'過關章已收進集章卡':'這關之前就蓋過章了'}</p>
+    <a class="btn red big" href="/booth?new=${isNew?g:''}">看我的集章卡 ▶</a>`;
+}else{
+  box.innerHTML=`<h1>${r==='old'?'過關碼過期了':'過關碼無效'}</h1><div class="seal no">？</div>
+    <p class="sub">${r==='old'?'這個 QR code 已超過 20 分鐘，請工作人員重新顯示。':'請重新掃描遊戲畫面上的 QR code。'}</p>
+    <a class="btn" href="/booth">看我的集章卡</a>`;
+}
+</script>
+</body>
+</html>

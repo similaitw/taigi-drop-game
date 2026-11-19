@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#d9412b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@500;700&family=Noto+Sans+TC:wght@500;700;900&family=Noto+Serif+TC:wght@900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="common.css">
+<script src="lib/qrcode.js"></script>
+<script src="common.js"></script>
+<title>台語賓果・台語闖關</title>
+<style>
+.view{display:none;flex:1;flex-direction:column;gap:12px}
+.view.on{display:flex}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+.mode{background:#fff;border:3px solid var(--line);border-radius:20px;padding:18px 10px;text-align:center;cursor:pointer;box-shadow:0 6px 0 var(--line)}
+.mode:active{transform:translateY(3px);box-shadow:0 3px 0 var(--line)}
+.mode .ic{font-size:46px}.mode b{display:block;font-size:22px}.mode span{font-size:13px;color:#7a5f48;font-weight:700}
+/* 主持人 */
+.code{font-size:15px;font-weight:900;background:#fff;border:3px solid var(--line);border-radius:14px;padding:4px 12px}
+.code b{font-size:28px;color:var(--red);letter-spacing:4px}
+.call{background:#fff;border:4px solid var(--line);border-radius:24px;box-shadow:0 8px 0 var(--line);text-align:center;padding:20px 10px;min-height:34vh;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.call .n{font-weight:900;color:#8a6f58}
+.call .hj{font-family:"Noto Serif TC",serif;font-weight:900;color:var(--red);font-size:clamp(60px,14vw,150px);line-height:1.1}
+.call .tl{font-size:clamp(18px,3vw,30px);color:#7a5f48;font-weight:700}
+.call .zh{font-size:clamp(20px,3vw,32px);font-weight:900;color:var(--teal);min-height:40px}
+.hist{display:flex;flex-wrap:wrap;gap:6px}
+.hist span{background:#fff;border:2px solid var(--line);border-radius:10px;padding:3px 9px;font-weight:900}
+.hist span small{color:var(--teal);font-weight:700;margin-left:4px}
+/* 玩家 */
+.card{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:520px;width:100%;margin:0 auto}
+.cell{aspect-ratio:1;background:#fff;border:3px solid var(--line);border-radius:16px;box-shadow:0 4px 0 var(--line);display:flex;align-items:center;justify-content:center;text-align:center;font-weight:900;cursor:pointer;position:relative;padding:4px;line-height:1.15;word-break:break-all}
+.cell.on{background:var(--gold)}
+.cell.on::after{content:"";position:absolute;inset:12%;border:5px solid var(--red);border-radius:50%;opacity:.75}
+.cell.line{background:#ffd9a0}
+.bingo{text-align:center;font-family:"Noto Serif TC",serif;font-weight:900;font-size:clamp(44px,10vw,80px);color:var(--red);display:none;text-shadow:3px 3px 0 #fff}
+.bingo.on{display:block;animation:pp .6s 3}
+</style>
+</head>
+<body>
+<div class="wrap" style="max-width:900px">
+  <div class="topbar"><div class="title">🎯 台語賓果</div><button class="iconbtn" id="musicBtn">🎵</button><a class="iconbtn" href="/booth">🏠</a></div>
+
+  <div class="view on" id="vMode"><div class="panel">
+    <h1>台語賓果</h1>
+    <p class="sub">主持人用台語念詞，玩家在自己的賓果卡上找出華語意思，<br>連成一條線就喊「賓果！」</p>
+    <div class="modes">
+      <div class="mode" id="toHost"><div class="ic">📢</div><b>我是主持人</b><span>開一局、抽詞、念台語</span></div>
+      <div class="mode" id="toPlayer"><div class="ic">🎫</div><b>我是玩家</b><span>輸入局號，拿賓果卡</span></div>
+    </div>
+    <p class="muted" id="srcInfo" style="text-align:center;margin-top:12px"></p>
+  </div></div>
+
+  <div class="view" id="vHostSet"><div class="panel">
+    <h1>開一局</h1><h2>難度</h2>
+    <div class="seg" id="lvSeg"><button data-l="1" class="sel">入門</button><button data-l="2">進階</button><button data-l="3">達人</button></div>
+    <div class="row"><button class="btn red big" id="newRound" style="flex:1">開局 ▶</button><button class="btn" data-back>返回</button></div>
+  </div></div>
+
+  <div class="view" id="vHost">
+    <div class="row" style="margin:0;justify-content:space-between">
+      <div class="code">局號 <b id="hCode"></b></div><div class="code">已抽 <b id="hCount" style="letter-spacing:0">0</b> / 24</div>
+    </div>
+    <div class="call"><div class="n" id="hN">請玩家輸入局號拿卡，準備好就抽第一個詞</div><div class="hj" id="hHj"></div><div class="tl tl" id="hTl"></div><div class="zh" id="hZh"></div></div>
+    <div class="row" style="margin:0"><button class="btn red big" id="drawBtn" style="flex:1">抽下一個（空白鍵）</button><button class="btn" id="zhBtn">顯示華語</button></div>
+    <div class="hist" id="hist"></div>
+    <div class="row"><button class="btn" id="endRound">結束這局</button></div>
+  </div>
+
+  <div class="view" id="vJoin"><div class="panel">
+    <h1>加入賓果</h1><p class="sub">輸入主持人畫面上的 4 位數局號</p>
+    <input type="text" id="codeIn" inputmode="numeric" maxlength="4" placeholder="例如 1234" style="width:100%;text-align:center;font-size:36px;letter-spacing:10px">
+    <div class="row"><button class="btn red big" id="joinBtn" style="flex:1">拿賓果卡 ▶</button><button class="btn" data-back>返回</button></div>
+    <div class="fail" id="joinErr"></div>
+  </div></div>
+
+  <div class="view" id="vPlayer">
+    <div class="row" style="margin:0;justify-content:space-between"><div class="code">局號 <b id="pCode"></b></div><div class="muted">聽到台語，就點它的華語意思</div></div>
+    <div class="bingo" id="bingoT">賓果！</div>
+    <div class="card" id="card"></div>
+    <div id="passBox"></div>
+    <div class="row" style="justify-content:center"><button class="btn" id="leave">離開這局</button></div>
+  </div>
+</div>
+<script>
+const {$,shuffle,esc}=T;
+let WORDS=[],hostLv=1,set=[],drawn=[],showZh=false,code='',marks=[],cardW=[],gotBingo=false;
+T.bindMusicBtn($('musicBtn'));T.onFirstTouch=()=>T.music.play('title');
+T.loadWords().then(w=>{WORDS=w;$('srcInfo').textContent=`題庫：${T.wordSource}・${w.length} 詞`;resume()});
+function view(id){document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id===id))}
+document.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>view('vMode'));
+$('toHost').onclick=()=>view('vHostSet');$('toPlayer').onclick=()=>{view('vJoin');$('joinErr').textContent='';setTimeout(()=>$('codeIn').focus(),50)};
+document.querySelectorAll('#lvSeg button').forEach(b=>b.onclick=()=>{hostLv=+b.dataset.l;document.querySelectorAll('#lvSeg button').forEach(x=>x.classList.toggle('sel',x===b))});
+// 同一局號 → 同一組 24 個詞（主持人和玩家各自算出來，不用連線）
+function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function roundSet(c){const lv=+c[0];const levels=lv===1?[1]:lv===2?[1,2]:[2,3];
+  const pool=T.byLevel(WORDS,levels).slice().sort((a,b)=>a.hj<b.hj?-1:a.hj>b.hj?1:0);const r=rng(+c);
+  for(let i=pool.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]]}
+  const out=[],seen=new Set();for(const w of pool){if(seen.has(w.zh))continue;seen.add(w.zh);out.push(w);if(out.length===24)break}return out}
+/* 主持人 */
+$('newRound').onclick=()=>{code=hostLv+String(Math.floor(Math.random()*900)+100);set=roundSet(code);drawn=[];showZh=false;T.store.set('bingo_host',{code,drawn:[]});hostView();T.music.play('fun')};
+function hostView(){view('vHost');$('hCode').textContent=code;$('hCount').textContent=drawn.length;
+  const last=drawn.length?set[drawn[drawn.length-1]]:null;
+  if(last){$('hN').textContent='第 '+drawn.length+' 個';$('hHj').textContent=last.hj;$('hTl').textContent=last.tl;$('hZh').textContent=showZh?last.zh:''}
+  $('hist').innerHTML=drawn.slice().reverse().map(i=>`<span>${esc(set[i].hj)}<small>${esc(set[i].zh)}</small></span>`).join('');
+  $('zhBtn').textContent=showZh?'隱藏華語':'顯示華語';$('drawBtn').disabled=drawn.length>=24}
+function draw(){if(drawn.length>=24)return;const left=set.map((_,i)=>i).filter(i=>!drawn.includes(i));drawn.push(left[Math.random()*left.length|0]);
+  T.store.set('bingo_host',{code,drawn});T.sfx.ding();showZh=false;hostView();$('hHj').classList.remove('pop');void $('hHj').offsetWidth;$('hHj').classList.add('pop')}
+$('drawBtn').onclick=draw;$('zhBtn').onclick=()=>{showZh=!showZh;hostView()};
+addEventListener('keydown',e=>{if(e.key===' '&&$('vHost').classList.contains('on')){e.preventDefault();draw()}});
+$('endRound').onclick=()=>{if(window.confirm('結束這一局？')){T.store.set('bingo_host',null);view('vMode')}};
+/* 玩家 */
+$('joinBtn').onclick=()=>{const c=$('codeIn').value.trim();if(!/^[123]\d{3}$/.test(c)){$('joinErr').textContent='局號是 4 位數字，第一碼是 1～3';return}
+  code=c;const s=roundSet(c);cardW=shuffle(s.slice()).slice(0,16);marks=Array(16).fill(false);gotBingo=false;savePlayer();playerView()};
+function savePlayer(){T.store.set('bingo_player',{code,card:cardW.map(w=>w.hj),marks,gotBingo})}
+function lines(){const L=[];for(let i=0;i<4;i++){L.push([0,1,2,3].map(j=>i*4+j));L.push([0,1,2,3].map(j=>j*4+i))}L.push([0,5,10,15],[3,6,9,12]);return L.filter(l=>l.every(k=>marks[k]))}
+function playerView(){view('vPlayer');$('pCode').textContent=code;const done=new Set(lines().flat());
+  $('card').innerHTML=cardW.map((w,i)=>`<div class="cell${marks[i]?' on':''}${done.has(i)?' line':''}" data-i="${i}">${esc(w.zh)}</div>`).join('');
+  document.querySelectorAll('.cell').forEach(c=>T.fitSize(c,c.textContent,30));
+  $('bingoT').classList.toggle('on',gotBingo)}
+$('card').addEventListener('click',e=>{const c=e.target.closest('.cell');if(!c)return;const i=+c.dataset.i;marks[i]=!marks[i];T.sfx.flip();
+  const had=gotBingo;if(!gotBingo&&lines().length){gotBingo=true}savePlayer();playerView();
+  if(gotBingo&&!had){T.sfx.win();T.confetti(innerWidth/2,innerHeight/3,50);T.showPass($('passBox'),'bingo','賓果！請主持人核對後掃描集章')}});
+$('leave').onclick=()=>{if(window.confirm('離開這局？賓果卡會清掉。')){T.store.set('bingo_player',null);$('passBox').innerHTML='';view('vMode')}};
+function resume(){const h=T.store.get('bingo_host',null),p=T.store.get('bingo_player',null);
+  if(p&&p.code){code=p.code;const s=roundSet(code);const m=new Map(s.map(w=>[w.hj,w]));cardW=p.card.map(k=>m.get(k)).filter(Boolean);
+    if(cardW.length===16){marks=p.marks;gotBingo=p.gotBingo;playerView();if(gotBingo)T.showPass($('passBox'),'bingo','賓果！請主持人核對後掃描集章');return}}
+  if(h&&h.code){code=h.code;set=roundSet(code);drawn=h.drawn||[];hostView()}}
+</script>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#d9412b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@500;700&family=Noto+Sans+TC:wght@500;700;900&family=Noto+Serif+TC:wght@900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="common.css">
+<script src="lib/qrcode.js"></script>
+<script src="common.js"></script>
+<title>翻牌記憶・台語闖關</title>
+<style>
+#board{flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(6px,1.4vw,14px);align-content:center;max-width:720px;width:100%;margin:0 auto;perspective:900px}
+.card{position:relative;aspect-ratio:4/5;cursor:pointer;transform-style:preserve-3d;transition:transform .35s}
+.card.open,.card.done{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;border:3px solid var(--line);border-radius:16px;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 5px 0 var(--line);padding:4px;text-align:center}
+.back{background:repeating-linear-gradient(45deg,#e85a40 0 12px,var(--red) 12px 24px);color:var(--gold);font-size:clamp(28px,6vw,48px)}
+.back::after{content:"";position:absolute;inset:6px;border:2px solid var(--gold);border-radius:11px}
+.front{background:#fff;transform:rotateY(180deg)}
+.front .w{font-weight:900;line-height:1.15;word-break:break-all}
+.front .t{font-size:clamp(10px,1.6vw,14px);color:#7a5f48;margin-top:2px}
+.front .tag{position:absolute;top:5px;left:6px;font-size:11px;font-weight:900;color:#fff;border-radius:6px;padding:0 5px}
+.tw .tag{background:var(--red)} .zh .tag{background:var(--teal)}
+.tw .w{font-family:"Noto Serif TC",serif;color:var(--red)}
+.card.done .front{background:#eafaf1;border-color:var(--ok)}
+.card.bad .front{animation:shk .4s;background:#ffecea}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="title">🃏 翻牌記憶</div>
+    <div class="stat"><b id="timeV">0</b><span>秒</span></div>
+    <div class="stat"><b id="pairV">0/8</b><span>配對</span></div>
+    <div class="stat"><b id="moveV">0</b><span>步數</span></div>
+    <button class="iconbtn" id="musicBtn">🎵</button>
+    <a class="iconbtn" href="/booth" title="闖關集章">🏠</a>
+  </div>
+  <div id="board"></div>
+</div>
+
+<div class="overlay" id="startOv"><div class="panel">
+  <h1>翻牌記憶</h1>
+  <p class="sub">翻開兩張牌，<b style="color:var(--red)">台語</b>和<b style="color:var(--teal)">華語</b>意思一樣就配成一對！<br>在時間內全部配完就過關。</p>
+  <div class="seg" id="lvSeg"><button data-l="easy">入門</button><button data-l="mid" class="sel">進階</button><button data-l="hard">達人</button></div>
+  <p class="muted" style="text-align:center" id="limitTip"></p>
+  <div class="row"><button class="btn red big" id="startBtn" style="flex:1">開始 ▶</button></div>
+  <p class="muted" id="srcInfo" style="text-align:center"></p>
+</div></div>
+
+<div class="overlay hide" id="endOv"><div class="panel" style="text-align:center">
+  <h1 id="endTitle">完成！</h1>
+  <div class="big-num" id="endTime">0</div>
+  <p class="sub" id="endInfo"></p>
+  <div id="passBox"></div>
+  <div class="row" style="justify-content:center"><button class="btn red" id="againBtn">再玩一次</button><a class="btn" href="/booth">集章卡</a></div>
+</div></div>
+
+<script>
+const {$,shuffle,esc}=T;
+const LIMIT={easy:120,mid:100,hard:90};
+let WORDS=[],lv=T.store.get('mem_lv','mid'),cards=[],open=[],busy=false,pairs=0,moves=0,t0=0,timer=0,playing=false;
+T.bindMusicBtn($('musicBtn'));
+T.onFirstTouch=()=>{if(!playing)T.music.play('title')};
+function selLv(l){lv=l;T.store.set('mem_lv',l);document.querySelectorAll('#lvSeg button').forEach(b=>b.classList.toggle('sel',b.dataset.l===l));
+  $('limitTip').textContent=`限時 ${LIMIT[l]} 秒內配完 8 對`}
+document.querySelectorAll('#lvSeg button').forEach(b=>b.onclick=()=>selLv(b.dataset.l));selLv(lv);
+T.loadWords().then(w=>{WORDS=w;$('srcInfo').textContent=`題庫：${T.wordSource}・${w.length} 詞`});
+
+function deal(){
+  const pool=T.byLevel(WORDS,T.LEVELS[lv].lv);const used=new Set();const pick=[];
+  for(const w of shuffle(pool.slice())){if(used.has(w.zh))continue;used.add(w.zh);pick.push(w);if(pick.length===8)break}
+  cards=shuffle(pick.flatMap((w,i)=>[{id:i,kind:'tw',w},{id:i,kind:'zh',w}]));
+  $('board').innerHTML=cards.map((c,i)=>`<div class="card" data-i="${i}"><div class="face back">🏮</div>
+    <div class="face front ${c.kind}"><span class="tag">${c.kind==='tw'?'台':'華'}</span><div class="w">${esc(c.kind==='tw'?c.w.hj:c.w.zh)}</div>${c.kind==='tw'&&c.w.tl?`<div class="t tl">${esc(c.w.tl)}</div>`:''}</div></div>`).join('');
+  document.querySelectorAll('.card .w').forEach(el=>T.fitSize(el,el.textContent,40));
+}
+$('board').addEventListener('pointerdown',e=>{const el=e.target.closest('.card');if(!el||!playing||busy)return;
+  const i=+el.dataset.i,c=cards[i];if(el.classList.contains('open')||el.classList.contains('done'))return;
+  el.classList.add('open');T.sfx.flip();open.push({i,el,c});
+  if(open.length===2){moves++;$('moveV').textContent=moves;const[a,b]=open;open=[];
+    if(a.c.id===b.c.id&&a.c.kind!==b.c.kind){
+      busy=true;setTimeout(()=>{a.el.classList.add('done');b.el.classList.add('done');busy=false;pairs++;$('pairV').textContent=pairs+'/8';
+        T.sfx.ok(pairs);const r=b.el.getBoundingClientRect();T.confetti(r.left+r.width/2,r.top+r.height/2,14);
+        T.toast(`${a.c.w.hj} ＝ ${a.c.w.zh}`,'ok',900);if(pairs===8)finish(true)},250);
+    }else{busy=true;setTimeout(()=>{a.el.classList.add('bad');b.el.classList.add('bad');T.sfx.bad()},300);
+      setTimeout(()=>{[a,b].forEach(x=>x.el.classList.remove('open','bad'));busy=false},1000)}
+  }
+});
+function tick(){const s=(performance.now()-t0)/1000;$('timeV').textContent=Math.floor(s);
+  T.music.rate=s>LIMIT[lv]-15?1.35:1; if(s>=LIMIT[lv]){finish(false);return} timer=requestAnimationFrame(tick)}
+function start(){T.fullscreen();$('startOv').classList.add('hide');$('endOv').classList.add('hide');
+  pairs=0;moves=0;open=[];busy=false;$('pairV').textContent='0/8';$('moveV').textContent=0;$('timeV').textContent=0;deal();
+  T.music.play('fun');
+  // 先讓大家偷看 2 秒
+  document.querySelectorAll('.card').forEach(c=>c.classList.add('open'));
+  setTimeout(()=>{document.querySelectorAll('.card').forEach(c=>c.classList.remove('open'));
+    T.countdown(()=>{playing=true;t0=performance.now();timer=requestAnimationFrame(tick)})},2200);
+}
+function finish(win){playing=false;cancelAnimationFrame(timer);T.music.stop();
+  const s=Math.round((performance.now()-t0)/1000);
+  setTimeout(()=>{$('endTitle').textContent=win?'全部配對成功！':'時間到！';$('endTime').textContent=win?s+' 秒':pairs+' / 8';
+    $('endInfo').textContent=win?`共翻了 ${moves} 步`:`還差 ${8-pairs} 對，再試一次！`;
+    if(win){T.sfx.win();T.confetti(innerWidth/2,innerHeight/3,40);T.showPass($('passBox'),'memory')}else{T.sfx.bad();$('passBox').innerHTML='<div class="fail">這次沒過關，再挑戰一次吧！</div>'}
+    $('endOv').classList.remove('hide');setTimeout(()=>T.music.play('title'),1600)},win?700:200);
+}
+$('startBtn').onclick=start;$('againBtn').onclick=()=>{$('endOv').classList.add('hide');$('startOv').classList.remove('hide')};
+</script>
+</body>
+</html>
