@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>台語接接樂</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#d9412b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="台語接接樂">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@500;700&family=Noto+Sans+TC:wght@500;700;900&family=Noto+Serif+TC:wght@900&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -192,6 +199,7 @@ body.touch .hint{display:none}
   .iconbtn{width:38px;height:38px;font-size:16px;border-width:2px;border-radius:10px;box-shadow:0 3px 0 #3a2a1e}
   #stopBtn{padding:0 8px!important;font-size:13px!important}
   #stopBtn .i{display:none}
+  #fsBtn{display:none}
   #timebar{height:9px;margin:6px 0;border-width:2px}
   #field{border-width:3px;border-radius:16px 16px 0 0}
   #lanes{border-width:3px;border-radius:0 0 16px 16px;gap:3px;padding-top:3px}
@@ -223,6 +231,7 @@ body.touch .hint{display:none}
     <div class="stat"><b id="scoreV">0</b><span>分數</span></div>
     <div class="stat"><b id="bestV">0</b><span>最高分</span></div>
     <button class="iconbtn" id="stopBtn" title="提早結束" style="width:auto;padding:0 12px;font-size:16px;font-weight:900;font-family:inherit"><span class="i">⏹ </span>結束</button>
+    <button class="iconbtn" id="fsBtn" title="全螢幕">⛶</button>
     <button class="iconbtn" id="musicBtn" title="音樂開關">🎵</button>
   </header>
   <div id="timebar"><div id="timefill"></div></div>
@@ -317,6 +326,7 @@ body.touch .hint{display:none}
     <div class="row">
       <label class="chk"><input type="checkbox" id="showTL" checked>顯示台羅</label>
       <label class="chk"><input type="checkbox" id="tlOnly">只看台羅（超難）</label>
+      <label class="chk"><input type="checkbox" id="fsAuto" checked>開始時全螢幕</label>
     </div>
     <div class="row">
       <button class="btn red" id="startBtn" style="flex:1;font-size:22px">開始遊戲 ▶</button>
@@ -859,10 +869,29 @@ $('tipClose').onclick=()=>{tipDismissed=true;$('tabletTip').classList.remove('on
 addEventListener('resize',detectDevice);addEventListener('orientationchange',()=>setTimeout(detectDevice,200));
 detectDevice();
 
+
+/* ===== 全螢幕 ===== */
+const fsEl=()=>document.fullscreenElement||document.webkitFullscreenElement;
+function enterFS(){
+  if(fsEl())return;
+  const el=document.documentElement,req=el.requestFullscreen||el.webkitRequestFullscreen;
+  if(!req)return;
+  try{const p=req.call(el,{navigationUI:'hide'});
+    const lock=()=>{try{screen.orientation&&screen.orientation.lock&&matchMedia('(pointer:coarse)').matches&&screen.orientation.lock('portrait').catch(()=>{})}catch(e){}};
+    if(p&&p.then)p.then(lock).catch(()=>{});else lock();
+  }catch(e){}
+}
+function exitFS(){const ex=document.exitFullscreen||document.webkitExitFullscreen;if(ex&&fsEl())try{const p=ex.call(document);p&&p.catch&&p.catch(()=>{})}catch(e){}}
+$('fsBtn').onclick=()=>fsEl()?exitFS():enterFS();
+const fsSupported=!!(document.documentElement.requestFullscreen||document.documentElement.webkitRequestFullscreen);
+if(!fsSupported){$('fsBtn').style.display='none';$('fsAuto').parentElement.style.display='none'}
+$('fsAuto').checked=store.get('tg2_fs',true);$('fsAuto').onchange=e=>store.set('tg2_fs',e.target.checked);
+['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{$('fsBtn').textContent=fsEl()?'🗗':'⛶';setTimeout(detectDevice,150)}));
+
 /* ===== 操作 ===== */
 document.addEventListener('keydown',e=>{
   if(e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT'&&e.key!=='Enter')return;
-  if(state==='idle'&&e.key==='Enter'){startGame();return}
+  if(state==='idle'&&e.key==='Enter'){if($('fsAuto').checked)enterFS();startGame();return}
   if((e.key==='+'||e.key==='='||e.key==='-')&&state==='play'){setSpeed(speedMul+(e.key==='-'?-.1:.1));$('modeTag').textContent=MODES[mode].name+' '+speedMul.toFixed(1)+'×';say('速度 '+speedMul.toFixed(1)+'×');return}
   if(state!=='play'||locked)return;
   if(e.key==='ArrowLeft'){setLane(lane-1);e.preventDefault()}
@@ -873,9 +902,9 @@ document.addEventListener('keydown',e=>{
 $('bL').onclick=()=>{if(state==='play'&&!locked)setLane(lane-1)};
 $('bR').onclick=()=>{if(state==='play'&&!locked)setLane(lane+1)};
 $('bD').onclick=drop;
-$('startBtn').onclick=startGame;
+$('startBtn').onclick=()=>{if($('fsAuto').checked)enterFS();startGame()};
 $('stopBtn').onclick=()=>{if(state==='play'){endGame()}else if(state==='count'){stopCount=true}};
-$('sameBtn').onclick=startGame;
+$('sameBtn').onclick=()=>{if($('fsAuto').checked)enterFS();startGame()};
 $('againBtn').onclick=()=>{$('endOv').classList.add('hide');$('nameIn').value='';renderBoard($('board'),boardMode);$('startOv').classList.remove('hide');state='idle';setTimeout(()=>$('nameIn').focus(),60)};
 $('clearBoard').onclick=()=>{store.set('tg2_board_'+boardMode,[]);store.set('tg2_best_'+boardMode,0);updateBest();renderBoard($('board'),boardMode)};
 $('editBtn').onclick=()=>{$('wordTA').value=wordText;$('wcount').textContent=WORDS.length;$('editMsg').textContent='';$('editOv').classList.remove('hide')};
