@@ -13,8 +13,9 @@
 <script src="common.js"></script>
 <title>翻牌記憶・台語闖關</title>
 <style>
-#board{flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(6px,1.4vw,14px);align-content:center;max-width:720px;width:100%;margin:0 auto;perspective:900px}
-.card{position:relative;aspect-ratio:4/5;cursor:pointer;transform-style:preserve-3d;transition:transform .35s}
+#area{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+#board{display:grid;grid-template-columns:repeat(var(--cols,4),var(--cw,80px));grid-auto-rows:var(--ch,100px);gap:var(--gap,10px);perspective:900px}
+.card{position:relative;cursor:pointer;transform-style:preserve-3d;transition:transform .35s}
 .card.open,.card.done{transform:rotateY(180deg)}
 .face{position:absolute;inset:0;border:3px solid var(--line);border-radius:16px;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 5px 0 var(--line);padding:4px;text-align:center}
 .back{background:repeating-linear-gradient(45deg,#e85a40 0 12px,var(--red) 12px 24px);color:var(--gold);font-size:clamp(28px,6vw,48px)}
@@ -39,7 +40,7 @@
     <button class="iconbtn" id="musicBtn">🎵</button>
     <a class="iconbtn" href="/" title="遊戲選單">🏠</a>
   </div>
-  <div id="board"></div>
+  <div id="area"><div id="board"></div></div>
 </div>
 
 <div class="overlay" id="startOv"><div class="panel">
@@ -70,13 +71,23 @@ function selLv(l){lv=l;T.store.set('mem_lv',l);document.querySelectorAll('#lvSeg
 document.querySelectorAll('#lvSeg button').forEach(b=>b.onclick=()=>selLv(b.dataset.l));selLv(lv);
 T.loadWords().then(w=>{WORDS=w;$('srcInfo').textContent=`題庫：${T.wordSource}・${w.length} 詞`});
 
+// 依畫面大小排版：直的 4×4、橫的 8×2，保證 16 張牌全部看得到
+function layout(){const a=$('area');const W=a.clientWidth,H=a.clientHeight;if(!W||!H)return;
+  const gap=Math.max(6,Math.min(14,Math.round(Math.min(W,H)/60)));let best=null;
+  for(const [c,r] of [[4,4],[8,2],[2,8]]){const cw=Math.min((W-gap*(c-1))/c,((H-gap*(r-1))/r)*0.8);if(!best||cw>best.cw)best={c,cw}}
+  const cw=Math.floor(Math.min(best.cw,170)),b=$('board').style;
+  b.setProperty('--cols',best.c);b.setProperty('--cw',cw+'px');b.setProperty('--ch',Math.floor(cw*1.25)+'px');b.setProperty('--gap',gap+'px');
+  document.querySelectorAll('.card .w').forEach(el=>{const n=[...el.textContent].length;el.style.fontSize=Math.round(cw*(n<=2?.34:n<=3?.28:n<=4?.22:.17))+'px'});
+  document.querySelectorAll('.card .t').forEach(el=>el.style.fontSize=Math.max(10,Math.round(cw*.11))+'px');
+  document.querySelectorAll('.back').forEach(el=>el.style.fontSize=Math.round(cw*.36)+'px')}
+addEventListener('resize',()=>requestAnimationFrame(layout));
 function deal(){
   const pool=T.byLevel(WORDS,T.LEVELS[lv].lv);const used=new Set();const pick=[];
   for(const w of shuffle(pool.slice())){if(used.has(w.zh))continue;used.add(w.zh);pick.push(w);if(pick.length===8)break}
   cards=shuffle(pick.flatMap((w,i)=>[{id:i,kind:'tw',w},{id:i,kind:'zh',w}]));
   $('board').innerHTML=cards.map((c,i)=>`<div class="card" data-i="${i}"><div class="face back">🏮</div>
     <div class="face front ${c.kind}"><span class="tag">${c.kind==='tw'?'台':'華'}</span><div class="w">${esc(c.kind==='tw'?c.w.hj:c.w.zh)}</div>${c.kind==='tw'&&c.w.tl?`<div class="t tl">${esc(c.w.tl)}</div>`:''}</div></div>`).join('');
-  document.querySelectorAll('.card .w').forEach(el=>T.fitSize(el,el.textContent,40));
+  layout();
 }
 $('board').addEventListener('pointerdown',e=>{const el=e.target.closest('.card');if(!el||!playing||busy)return;
   const i=+el.dataset.i,c=cards[i];if(el.classList.contains('open')||el.classList.contains('done'))return;
