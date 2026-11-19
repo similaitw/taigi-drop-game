@@ -28,6 +28,16 @@
       "source": "/pass",
       "destination": "/",
       "permanent": false
+    },
+    {
+      "source": "/speak",
+      "destination": "/whack",
+      "permanent": false
+    },
+    {
+      "source": "/bingo",
+      "destination": "/quiz",
+      "permanent": false
     }
   ]
 }

@@ -130,8 +130,8 @@ T.STATIONS = [
   {id:'duel',   name:'搶答對決',   icon:'⚔️', url:'/duel',    desc:'兩人比快，先拿分的贏'},
   {id:'memory', name:'翻牌記憶',   icon:'🃏', url:'/memory',  desc:'台語華語配成對'},
   {id:'proverb',name:'俗語接龍',   icon:'📜', url:'/proverb', desc:'接出俗語的下半句'},
-  {id:'speak',  name:'講台語挑戰', icon:'🎤', url:'/speak',   desc:'看華語，講台語'},
-  {id:'bingo',  name:'台語賓果',   icon:'🎯', url:'/bingo',   desc:'聽台語，連成一線'}
+  {id:'whack',  name:'台語打地鼠', icon:'🔨', url:'/whack',   desc:'打中舉對答案的地鼠'},
+  {id:'quiz',   name:'著毋著快問快答', icon:'⭕', url:'/quiz', desc:'台語華語對不對？'}
 ];
 // 過關／未過關大字結果，給關主看
 T.showResult = function(el, win, tip=''){
